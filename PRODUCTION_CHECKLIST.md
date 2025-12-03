@@ -3,16 +3,18 @@
 ## ✅ Completed Setup
 
 ### Backend Configuration
-- [x] Added missing dependencies (`bcryptjs`, `jsonwebtoken`) to `backend/package.json`
+- [x] Added missing dependencies (`bcryptjs`, `jsonwebtoken`, `@sendgrid/mail`, `qrcode`) to `backend/package.json`
 - [x] Updated CORS configuration for production (supports environment-based origins)
 - [x] Updated MongoDB connection with production-ready options
 - [x] Created admin user creation script (`backend/scripts/createAdmin.js`)
 - [x] Updated JWT_SECRET handling with warnings for default values
+- [x] Improved SendGrid email functionality with QR code attachments
 - [x] Created `.env` file in `backend/` directory with:
   - MongoDB connection string
   - Admin credentials (admin@auraevents.com / maxyTech@143)
   - JWT_SECRET placeholder
   - Frontend URL placeholder
+  - SendGrid API key placeholder
 
 ### Frontend Configuration
 - [x] Created `.env` file in root with `VITE_API_URL` placeholder
@@ -74,9 +76,17 @@ npm run dev
    FRONTEND_URL=https://your-vercel-app.vercel.app
    ADMIN_EMAIL=admin@auraevents.com
    ADMIN_PASSWORD=maxyTech@143
+   SENDGRID_API_KEY=<your-sendgrid-api-key>
+   SENDGRID_FROM=no-reply@auraevents.com
    ```
 
-3. **Create Admin User**:
+3. **Set up SendGrid**:
+   - Create account at [SendGrid](https://sendgrid.com)
+   - Create API key with Mail Send permissions
+   - Verify sender email address
+   - Add API key and sender email to Render environment variables
+
+4. **Create Admin User**:
    - After deployment, run: `npm run create-admin` via Render shell
    - Or use the API endpoint with ADMIN_SETUP_TOKEN
 
@@ -100,6 +110,8 @@ npm run dev
 - [ ] Change `JWT_SECRET` from default value (generate strong random string)
 - [ ] Change admin password after first login
 - [ ] Set `ADMIN_SETUP_TOKEN` for additional security
+- [ ] Set up SendGrid API key (required for QR code emails)
+- [ ] Verify sender email in SendGrid
 - [ ] Verify `.env` files are in `.gitignore` (already done)
 - [ ] Use HTTPS (automatic with Vercel/Render)
 
@@ -110,6 +122,9 @@ npm run dev
 - [ ] API endpoints respond correctly
 - [ ] CORS allows frontend requests
 - [ ] Frontend can connect to backend
+- [ ] Test guest registration
+- [ ] Verify QR code email is sent to registered guests
+- [ ] Check email delivery in SendGrid dashboard
 - [ ] All features work as expected
 
 ## 📝 Environment Variables Summary
@@ -123,6 +138,8 @@ JWT_SECRET=<change-this>
 FRONTEND_URL=<your-vercel-url>
 ADMIN_EMAIL=admin@auraevents.com
 ADMIN_PASSWORD=maxyTech@143
+SENDGRID_API_KEY=<your-sendgrid-api-key>
+SENDGRID_FROM=no-reply@auraevents.com
 ```
 
 ### Frontend (.env)
@@ -146,6 +163,13 @@ VITE_API_URL=<your-render-backend-url>/api
 - Run `npm run create-admin` script
 - Check database connection
 - Verify admin credentials
+
+### If QR code emails aren't sending:
+- Verify `SENDGRID_API_KEY` is set correctly
+- Check `SENDGRID_FROM` email is verified in SendGrid
+- Check SendGrid dashboard for delivery status
+- Review backend logs for SendGrid errors
+- Note: Registration will still work without SendGrid, but emails won't be sent
 
 ## 📞 Admin Credentials
 

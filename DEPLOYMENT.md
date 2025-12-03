@@ -106,6 +106,8 @@ JWT_SECRET=your-local-jwt-secret-key
 FRONTEND_URL=http://localhost:5173
 ADMIN_EMAIL=admin@auraevents.com
 ADMIN_PASSWORD=maxyTech@143
+SENDGRID_API_KEY=your-sendgrid-api-key-here
+SENDGRID_FROM=no-reply@auraevents.com
 ```
 
 ### Frontend (.env file)
@@ -123,15 +125,47 @@ VITE_API_URL=http://localhost:4000/api
 
 **Important**: Change the admin password after first login in production!
 
+## SendGrid Email Setup
+
+### Step 1: Create SendGrid Account
+
+1. Sign up at [SendGrid](https://sendgrid.com)
+2. Verify your account (check email)
+
+### Step 2: Create API Key
+
+1. Go to [SendGrid API Keys](https://app.sendgrid.com/settings/api_keys)
+2. Click "Create API Key"
+3. Name it (e.g., "Aura Events Production")
+4. Select "Full Access" or "Restricted Access" with Mail Send permissions
+5. Copy the API key (you won't see it again!)
+
+### Step 3: Verify Sender Email
+
+1. Go to [Sender Authentication](https://app.sendgrid.com/settings/sender_auth)
+2. Verify a Single Sender or Domain
+3. Use the verified email address for `SENDGRID_FROM`
+
+### Step 4: Set Environment Variables
+
+Add to Render environment variables:
+- `SENDGRID_API_KEY`: Your SendGrid API key
+- `SENDGRID_FROM`: Your verified sender email (e.g., `no-reply@auraevents.com`)
+
+**Note**: Without SendGrid configured, QR code emails will not be sent, but registration will still work.
+
 ## Post-Deployment Checklist
 
 - [ ] Backend deployed and running on Render
 - [ ] Frontend deployed and running on Vercel
 - [ ] Environment variables set correctly
+- [ ] SendGrid API key configured
+- [ ] SendGrid sender email verified
 - [ ] Admin user created
 - [ ] CORS configured correctly
 - [ ] Test admin login
 - [ ] Test API endpoints
+- [ ] Test guest registration and QR code email
 - [ ] Update admin password
 - [ ] Set up proper JWT_SECRET (not default)
 
