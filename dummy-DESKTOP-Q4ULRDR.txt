@@ -1,0 +1,1 @@
+so this is the mongoose db mongodb+srv://nickwestwood41_db_user:VQzBs2Hxo5L45cU9@cluster0.wjbetmd.mongodb.net/?appName=Cluster0 and i want to lunch for production on vercel and render so check if all systems are good to go and also add this as the admin email: admin@auraevents.com password: maxyTech@143

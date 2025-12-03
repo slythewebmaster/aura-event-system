@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: aura-event-backend
+    env: node
+    plan: free
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: MONGO_URI
+        value: mongodb+srv://nickwestwood41_db_user:VQzBs2Hxo5L45cU9@cluster0.wjbetmd.mongodb.net/?appName=Cluster0
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        sync: false  # Set this to your Vercel frontend URL after deployment
+      - key: ADMIN_EMAIL
+        value: admin@auraevents.com
+      - key: ADMIN_PASSWORD
+        value: maxyTech@143
+      - key: SENDGRID_API_KEY
+        sync: false  # Set this to your SendGrid API key
+      - key: SENDGRID_FROM
+        value: no-reply@auraevents.com  # Update with your verified SendGrid sender email
+
