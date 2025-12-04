@@ -187,4 +187,37 @@ router.get('/:id/guests', requireAuth, requireAdmin, async (req, res, next) => {
   }
 });
 
+// Delete event and all associated data (admin only)
+router.delete('/:id', requireAuth, requireAdmin, async (req, res, next) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    // Delete all associated invites
+    const invitesDeleted = await Invite.deleteMany({ event: req.params.id });
+    
+    // Delete all associated guests
+    const guestsDeleted = await Guest.deleteMany({ event: req.params.id });
+    
+    // Delete the event
+    await Event.findByIdAndDelete(req.params.id);
+
+    console.log(`Event ${event.name} deleted: ${invitesDeleted.deletedCount} invites, ${guestsDeleted.deletedCount} guests removed`);
+
+    res.json({
+      message: 'Event deleted successfully',
+      deleted: {
+        event: event.name,
+        invites: invitesDeleted.deletedCount,
+        guests: guestsDeleted.deletedCount,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
