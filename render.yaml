@@ -5,6 +5,7 @@ services:
     plan: free
     buildCommand: cd backend && npm install
     startCommand: cd backend && npm start
+    # Note: Make sure Render dashboard Start Command matches: cd backend && npm start
     envVars:
       - key: NODE_ENV
         value: production
