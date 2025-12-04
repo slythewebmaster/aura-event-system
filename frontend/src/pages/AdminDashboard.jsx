@@ -88,6 +88,29 @@ function AdminDashboard() {
     }
   };
 
+  const deleteEvent = async (eventId, eventName) => {
+    if (!window.confirm(`Are you sure you want to delete "${eventName}"?\n\nThis will permanently delete:\n- The event\n- All invites (${selectedEvent?.stats?.totalInvites || '?'} invites)\n- All guest registrations (${selectedEvent?.stats?.registered || '?'} guests)\n\nThis action cannot be undone!`)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      setSuccess(null);
+      await apiClient.delete(`/events/${eventId}`);
+      setSuccess(`Event "${eventName}" deleted successfully`);
+      if (selectedEvent && selectedEvent._id === eventId) {
+        setSelectedEvent(null);
+      }
+      await fetchEvents();
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      setError(err.message || 'Failed to delete event');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (selectedEvent) {
     return (
       <div>
@@ -130,6 +153,18 @@ function AdminDashboard() {
               className="aura-btn aura-btn-primary"
             >
               Copy All Unused Links
+            </button>
+            <button 
+              onClick={() => deleteEvent(selectedEvent._id, selectedEvent.name)}
+              className="aura-btn"
+              style={{ 
+                backgroundColor: '#ef4444', 
+                color: 'white',
+                border: 'none'
+              }}
+              disabled={loading}
+            >
+              {loading ? 'Deleting...' : 'Delete Event'}
             </button>
           </div>
           <div style={{ marginTop: '24px' }}>
@@ -259,7 +294,7 @@ function AdminDashboard() {
                 type="number"
                 min="10"
                 max="500"
-                defaultValue="200"
+                defaultValue={200}
                 className="aura-input"
                 placeholder="200"
               />
