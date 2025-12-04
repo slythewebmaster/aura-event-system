@@ -57,8 +57,11 @@ function AdminDashboard() {
     try {
       setLoading(true);
       setError(null);
-      const response = await apiClient.post('/events', { ...data, maxGuests: 200 });
-      setSuccess(`Event "${response.data.event.name}" created with 200 invites!`);
+      const maxGuests = data.maxGuests || 200;
+      // Ensure maxGuests is within valid range
+      const validMaxGuests = Math.max(10, Math.min(500, parseInt(maxGuests) || 200));
+      const response = await apiClient.post('/events', { ...data, maxGuests: validMaxGuests });
+      setSuccess(`Event "${response.data.event.name}" created with ${validMaxGuests} invites!`);
       reset();
       fetchEvents();
     } catch (err) {
@@ -244,6 +247,27 @@ function AdminDashboard() {
               />
               {errors.location && <div style={{ color: '#fca5a5', fontSize: '14px', marginTop: '4px' }}>{errors.location.message}</div>}
             </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>Number of Invites *</label>
+              <input
+                {...register('maxGuests', { 
+                  required: 'Number of invites is required',
+                  min: { value: 10, message: 'Minimum 10 invites required' },
+                  max: { value: 500, message: 'Maximum 500 invites allowed' },
+                  valueAsNumber: true
+                })}
+                type="number"
+                min="10"
+                max="500"
+                defaultValue="200"
+                className="aura-input"
+                placeholder="200"
+              />
+              {errors.maxGuests && <div style={{ color: '#fca5a5', fontSize: '14px', marginTop: '4px' }}>{errors.maxGuests.message}</div>}
+              <div style={{ fontSize: '12px', color: 'var(--aura-text-muted)', marginTop: '4px' }}>
+                Range: 10 - 500 invites
+              </div>
+            </div>
           </div>
           <div style={{ marginBottom: '16px' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>Description</label>
@@ -255,7 +279,7 @@ function AdminDashboard() {
             />
           </div>
           <button type="submit" className="aura-btn aura-btn-primary" disabled={loading}>
-            {loading ? 'Creating...' : 'Create Event (200 Invites)'}
+            {loading ? 'Creating...' : 'Create Event'}
           </button>
         </form>
       </div>

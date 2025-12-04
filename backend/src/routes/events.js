@@ -16,11 +16,17 @@ router.post('/', requireAuth, requireAdmin, async (req, res, next) => {
       return res.status(400).json({ message: 'Name, date, and location are required' });
     }
 
-    const event = new Event({ name, date, location, description, maxGuests });
+    // Validate maxGuests range
+    const numGuests = parseInt(maxGuests);
+    if (isNaN(numGuests) || numGuests < 10 || numGuests > 500) {
+      return res.status(400).json({ message: 'Number of invites must be between 10 and 500' });
+    }
+
+    const event = new Event({ name, date, location, description, maxGuests: numGuests });
     await event.save();
 
     const invites = [];
-    for (let i = 0; i < maxGuests; i++) {
+    for (let i = 0; i < numGuests; i++) {
       const code = await generateUniqueCode();
       invites.push({
         event: event._id,
@@ -33,7 +39,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res, next) => {
 
     res.status(201).json({
       event,
-      message: `Event created with ${maxGuests} pre-allocated invites`,
+      message: `Event created with ${numGuests} pre-allocated invites`,
     });
   } catch (error) {
     next(error);
