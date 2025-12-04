@@ -18,8 +18,16 @@ router.post('/scan', async (req, res, next) => {
       return res.status(404).json({ message: 'Invalid invite code' });
     }
 
-    if (eventId && invite.event.toString() !== eventId) {
-      return res.status(400).json({ message: 'Invite code does not match this event' });
+    // Validate eventId if provided - normalize both to strings for comparison
+    // Note: Since invite codes are unique, this validation is optional but helps prevent cross-event check-ins
+    if (eventId) {
+      // invite.event is an ObjectId reference, convert to string for comparison
+      const inviteEventId = String(invite.event).trim();
+      const providedEventId = String(eventId).trim();
+      if (inviteEventId !== providedEventId) {
+        console.warn(`Event ID mismatch for invite ${inviteCode}: invite event=${inviteEventId}, provided=${providedEventId}`);
+        return res.status(400).json({ message: 'Invite code does not match this event' });
+      }
     }
 
     if (invite.status === 'unused') {
