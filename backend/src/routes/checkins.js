@@ -8,35 +8,38 @@ router.post('/scan', async (req, res, next) => {
   try {
     const { inviteCode, eventId, deviceInfo } = req.body;
 
+    console.log('Check-in scan request:', { inviteCode, eventId, hasDeviceInfo: !!deviceInfo });
+
     if (!inviteCode) {
+      console.error('Missing inviteCode in request');
       return res.status(400).json({ message: 'Invite code is required' });
     }
 
     const invite = await Invite.findOne({ code: inviteCode }).populate('guest');
 
     if (!invite) {
+      console.error(`Invite not found for code: ${inviteCode}`);
       return res.status(404).json({ message: 'Invalid invite code' });
     }
 
-    // Validate eventId if provided - normalize both to strings for comparison
-    // Note: Since invite codes are unique, this validation is optional but helps prevent cross-event check-ins
-    if (eventId) {
-      // invite.event is an ObjectId reference, convert to string for comparison
-      const inviteEventId = String(invite.event).trim();
-      const providedEventId = String(eventId).trim();
-      if (inviteEventId !== providedEventId) {
-        console.warn(`Event ID mismatch for invite ${inviteCode}: invite event=${inviteEventId}, provided=${providedEventId}`);
-        return res.status(400).json({ message: 'Invite code does not match this event' });
-      }
-    }
+    console.log(`Invite found: ${inviteCode}, status: ${invite.status}, event: ${invite.event}`);
+
+    // No need to validate eventId - invite codes are unique and already tied to events in the database
+    // The eventId in the QR code is optional and mainly for display purposes
 
     if (invite.status === 'unused') {
-      return res.status(400).json({ message: 'This invite has not been registered yet' });
+      console.warn(`Attempted check-in for unregistered invite: ${inviteCode}`);
+      return res.status(400).json({ 
+        message: 'This invite has not been registered yet. The guest must complete registration first.',
+        inviteCode: inviteCode,
+        status: invite.status
+      });
     }
 
     const guest = await Guest.findOne({ invite: invite._id });
 
     if (!guest) {
+      console.error(`Guest not found for invite: ${inviteCode}, invite._id: ${invite._id}`);
       return res.status(404).json({ message: 'Guest not found for this invite' });
     }
 

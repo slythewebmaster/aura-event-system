@@ -46,12 +46,21 @@ function CheckinScanner() {
       try {
         qrPayload = JSON.parse(decodedText);
       } catch {
+        // If not JSON, treat the entire decoded text as the invite code
         qrPayload = { inviteCode: decodedText };
+      }
+
+      // Ensure we have an inviteCode
+      if (!qrPayload.inviteCode) {
+        setError('Invalid QR code format: invite code not found');
+        return;
       }
 
       setLoading(true);
       setError(null);
       setScanResult(null);
+
+      console.log('Scanning QR code:', { inviteCode: qrPayload.inviteCode, eventId: qrPayload.eventId });
 
       const response = await apiClient.post('/checkins/scan', {
         inviteCode: qrPayload.inviteCode,
@@ -61,7 +70,10 @@ function CheckinScanner() {
 
       setScanResult(response.data);
     } catch (err) {
-      setError(err.message);
+      console.error('Check-in scan error:', err);
+      // Show more detailed error message
+      const errorMessage = err.response?.data?.message || err.message || 'An error occurred during check-in';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
