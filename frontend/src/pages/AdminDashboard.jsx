@@ -93,6 +93,8 @@ function AdminDashboard() {
         </button>
         <div className="aura-card">
           <h2 style={{ marginBottom: '16px', fontSize: '28px' }}>{selectedEvent.name}</h2>
+          {success && <div className="aura-success" style={{ marginBottom: '16px' }}>{success}</div>}
+          {error && <div className="aura-error" style={{ marginBottom: '16px' }}>{error}</div>}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
             <div className="aura-card" style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--aura-purple)' }}>{selectedEvent.stats.totalInvites}</div>
@@ -107,12 +109,24 @@ function AdminDashboard() {
               <div style={{ color: 'var(--aura-text-muted)' }}>Checked In</div>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
             <button onClick={() => fetchEventDetails(selectedEvent._id)} className="aura-btn aura-btn-secondary">
               Refresh
             </button>
             <button onClick={() => exportCSV(selectedEvent._id)} className="aura-btn aura-btn-gold">
               Export CSV
+            </button>
+            <button 
+              onClick={() => {
+                const unusedInvites = invites.filter(inv => inv.status === 'unused');
+                const links = unusedInvites.map(inv => `${window.location.origin}/register/${inv.code}`).join('\n');
+                navigator.clipboard.writeText(links);
+                setSuccess(`Copied ${unusedInvites.length} registration links to clipboard!`);
+                setTimeout(() => setSuccess(null), 3000);
+              }}
+              className="aura-btn aura-btn-primary"
+            >
+              Copy All Unused Links
             </button>
           </div>
           <div style={{ marginTop: '24px' }}>
@@ -122,6 +136,7 @@ function AdminDashboard() {
                 <thead>
                   <tr style={{ borderBottom: '1px solid rgba(99, 102, 241, 0.3)' }}>
                     <th style={{ padding: '12px', textAlign: 'left' }}>Code</th>
+                    <th style={{ padding: '12px', textAlign: 'left' }}>Registration Link</th>
                     <th style={{ padding: '12px', textAlign: 'left' }}>Status</th>
                     <th style={{ padding: '12px', textAlign: 'left' }}>Guest Name</th>
                     <th style={{ padding: '12px', textAlign: 'left' }}>Email</th>
@@ -129,19 +144,58 @@ function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {invites.map((invite) => (
-                    <tr key={invite._id} style={{ borderBottom: '1px solid rgba(99, 102, 241, 0.1)' }}>
-                      <td style={{ padding: '12px' }}>{invite.code}</td>
-                      <td style={{ padding: '12px' }}>
-                        <span className={`aura-badge aura-badge-${invite.status.replace('_', '-')}`}>
-                          {invite.status.replace('_', ' ')}
-                        </span>
-                      </td>
-                      <td style={{ padding: '12px' }}>{invite.guest?.name || '-'}</td>
-                      <td style={{ padding: '12px' }}>{invite.guest?.email || '-'}</td>
-                      <td style={{ padding: '12px' }}>{invite.guest?.phone || '-'}</td>
-                    </tr>
-                  ))}
+                  {invites.map((invite) => {
+                    const registrationLink = `${window.location.origin}/register/${invite.code}`;
+                    return (
+                      <tr key={invite._id} style={{ borderBottom: '1px solid rgba(99, 102, 241, 0.1)' }}>
+                        <td style={{ padding: '12px', fontFamily: 'monospace', fontWeight: 'bold' }}>{invite.code}</td>
+                        <td style={{ padding: '12px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <input
+                              type="text"
+                              readOnly
+                              value={registrationLink}
+                              onClick={(e) => e.target.select()}
+                              style={{
+                                flex: 1,
+                                padding: '6px 10px',
+                                fontSize: '12px',
+                                border: '1px solid rgba(99, 102, 241, 0.2)',
+                                borderRadius: '6px',
+                                backgroundColor: '#f9fafb',
+                                fontFamily: 'monospace',
+                                cursor: 'text',
+                                minWidth: '300px'
+                              }}
+                            />
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(registrationLink);
+                                setSuccess(`Registration link copied!`);
+                                setTimeout(() => setSuccess(null), 2000);
+                              }}
+                              className="aura-btn aura-btn-secondary"
+                              style={{ 
+                                padding: '6px 12px', 
+                                fontSize: '12px',
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              Copy
+                            </button>
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px' }}>
+                          <span className={`aura-badge aura-badge-${invite.status.replace('_', '-')}`}>
+                            {invite.status.replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px' }}>{invite.guest?.name || '-'}</td>
+                        <td style={{ padding: '12px' }}>{invite.guest?.email || '-'}</td>
+                        <td style={{ padding: '12px' }}>{invite.guest?.phone || '-'}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
