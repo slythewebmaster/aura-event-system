@@ -7,14 +7,45 @@ const mongoose = require('mongoose');
 const app = express();
 
 // CORS configuration for production
+const frontendUrl = process.env.FRONTEND_URL;
+console.log('FRONTEND_URL from environment:', frontendUrl || 'NOT SET (using wildcard)');
+
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || '*',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // If FRONTEND_URL is set, check if origin matches
+    if (frontendUrl) {
+      // Support multiple origins (comma-separated) or single origin
+      const allowedOrigins = frontendUrl.split(',').map(url => url.trim());
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+    }
+    
+    // Allow all origins if FRONTEND_URL is not set (development)
+    if (!frontendUrl) {
+      return callback(null, true);
+    }
+    
+    // Reject other origins
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+
+// Request logging middleware for debugging
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path} - Origin: ${req.get('origin') || 'none'}`);
+  next();
+});
 
 const apiRouter = require('./src/routes');
 app.use('/api', apiRouter);
