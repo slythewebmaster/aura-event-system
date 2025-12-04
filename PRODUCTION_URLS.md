@@ -27,6 +27,19 @@ FRONTEND_URL=https://auraeventsystem.vercel.app
 
 **Note**: The `FRONTEND_URL` is used for CORS configuration to allow requests from your frontend.
 
+## Admin Login Credentials
+
+**Email:** `admin@auraevents.com`  
+**Password:** `maxyTech@143`  
+**Login URL:** https://auraeventsystem.vercel.app/admin/login
+
+**Note:** If the admin user doesn't exist, create it using Render Shell:
+```bash
+cd backend && npm run create-admin
+```
+
+See `ADMIN_CREDENTIALS.md` for detailed instructions.
+
 ## API Endpoints
 
 All API endpoints are available at:
